@@ -2,12 +2,16 @@ const express = require("express");
 const cors = require("cors");
 const bodyParser = require("body-parser");
 const admin = require("firebase-admin");
+
+// Load Firebase key from environment variable
 let serviceAccount;
 
-serviceAccount = JSON.parse(process.env.FIREBASE_KEY);
+try {
+  serviceAccount = JSON.parse(process.env.FIREBASE_KEY);
   console.log("Firebase key loaded successfully");
 } catch (err) {
   console.error("Error loading Firebase key:", err);
+  process.exit(1);
 }
 
 // Initialize Firebase
@@ -33,7 +37,6 @@ app.post("/signup", async (req, res) => {
 
     const { email, password, name } = req.body;
 
-    // Create user
     const user = await admin.auth().createUser({
       email,
       password,
@@ -41,7 +44,6 @@ app.post("/signup", async (req, res) => {
 
     console.log("User created:", user.uid);
 
-    // Save in Firestore
     await db.collection("users").doc(user.uid).set({
       email,
       name,
